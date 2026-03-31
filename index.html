@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>全屏超嗨切水果</title>
+<style>
+* {margin:0;padding:0;box-sizing:border-box;overflow:hidden;}
+html,body{width:100%;height:100%;background:#222;}
+
+body.shake{animation: shakeBody 0.25s ease-out;}
+@keyframes shakeBody{
+  0%{transform:translate(2px,2px);}
+  25%{transform:translate(-2px,-1px);}
+  50%{transform:translate(1px,-1px);}
+  75%{transform:translate(-1px,1px);}
+  100%{transform:translate(0,0);}
+}
+
+h1 {
+  font-size:26px;
+  color:#fff;
+  padding:8px 0;
+  text-align:center;
+  margin:0;
+}
+.top-info{
+  display:flex;
+  justify-content:center;
+  gap:60px;
+  font-size:20px;
+  color:#fff;
+  margin-bottom:5px;
+}
+#gameCanvas{
+  display:block;
+  width:100vw;
+  height:calc(100vh - 90px);
+  cursor:none;
+  background: #d7b98c;
+  background-image: linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px),
+  linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+/* 🔪 菜刀再次加大 */
+.knife{
+  position:fixed;
+  font-size:75px;
+  pointer-events:none;
+  transform:rotate(-30deg);
+  z-index:999;
+}
+.rank-box{
+  position:absolute;
+  right:20px;
+  top:90px;
+  background:rgba(0,0,0,0.6);
+  color:#fff;
+  padding:15px;
+  border-radius:10px;
+}
+.rank-box h3{color:#ffd700;margin-bottom:10px;}
+.rank-item{font-size:16px;line-height:1.6;}
+
+.start-pop,.pop{
+  position:absolute;left:50%;top:55%;
+  transform:translate(-50%,-50%);
+  background:rgba(0,0,0,0.85);
+  color:#fff;padding:40px 60px;border-radius:15px;font-size:24px;
+}
+.start-pop{display:block;}
+.pop{display:none;}
+.pop button,.start-pop button{
+  margin-top:20px;padding:10px 25px;font-size:18px;
+  background:#ff9500;border:none;border-radius:8px;color:#fff;cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h1>🍉 全屏超嗨切水果 · 45秒挑战 🍎</h1>
+<div class="top-info">
+  <div>⏱ 剩余时间：<span id="time">45</span> 秒</div>
+  <div>💯 当前分数：<span id="score">0</span></div>
+  <div>❤️ 生命：<span id="life">❤️❤️❤️</span></div>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+<div class="knife" id="knife">🔪</div>
+
+<div class="rank-box">
+  <h3>🏆战绩排行榜</h3>
+  <div id="rankList"></div>
+</div>
+
+<div class="start-pop" id="startPop">
+  <div>准备开始！</div>
+  <button onclick="startGame()">点击开始游戏</button>
+</div>
+<div class="pop" id="pop">
+  <div id="popText"></div>
+  <button onclick="restartGame()">再来一局</button>
+</div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+function resizeCanvas(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight - 90;
+}
+resizeCanvas();
+window.addEventListener('resize',resizeCanvas);
+
+let score = 0;
+let life = 3;
+let timeLeft = 45;
+let gameStart = false;
+let gameOver = false;
+let timer = null;
+
+const scoreDom = document.getElementById("score");
+const lifeDom = document.getElementById("life");
+const timeDom = document.getElementById("time");
+const popDom = document.getElementById("pop");
+const popTextDom = document.getElementById("popText");
+const startPop = document.getElementById("startPop");
+const rankListDom = document.getElementById("rankList");
+const knife = document.getElementById("knife");
+
+const fruitEmoji = ["🍎","🍊","🍋","🍉","🍌","🥝"];
+const bombEmoji = "💣";
+let mx = 0, my = 0;
+
+document.addEventListener("mousemove",e=>{
+  mx = e.clientX;
+  my = e.clientY;
+  knife.style.left = mx + "px";
+  knife.style.top = my + "px";
+});
+
+class FloatText{
+  constructor(x,y,text,color){
+    this.x = x; this.y = y; this.text = text; this.color = color;
+    this.alpha = 1; this.yOffset = 0;
+  }
+  update(){this.yOffset-=1;this.alpha-=0.02;}
+  draw(){
+    ctx.save();ctx.globalAlpha=this.alpha;
+    ctx.fillStyle=this.color;ctx.font="bold 24px Arial";
+    ctx.fillText(this.text,this.x,this.y+this.yOffset);
+    ctx.restore();
+  }
+}
+let floatTexts = [];
+
+class Particle{
+  constructor(x,y,color){
+    this.x=x;this.y=y;this.vx=(Math.random()-0.5)*4;
+    this.vy=(Math.random()-0.5)*4;this.color=color;
+    this.alpha=1;this.size=Math.random()*4+2;
+  }
+  update(){this.x+=this.vx;this.y+=this.vy;this.alpha-=0.05;}
+  draw(){
+    ctx.save();ctx.globalAlpha=this.alpha;ctx.fillStyle=this.color;
+    ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  }
+}
+let particles = [];
+
+class Item{
+  constructor(isBomb=false){
+    this.isBomb=isBomb;
+    this.emoji=isBomb?bombEmoji:fruitEmoji[Math.floor(Math.random()*fruitEmoji.length)];
+    this.x=Math.random()*canvas.width;
+    this.y=canvas.height+50;
+    // ========== 抛更高、初速度更大 ==========
+    this.vy=-(Math.random()*9 + 14);
+    this.vx=Math.random()*6 - 3;
+    // ========== 水果超大尺寸 ==========
+    this.size=85;
+    this.cut=false;
+  }
+  update(){
+    this.y += this.vy;
+    this.x += this.vx;
+    this.vy += 0.32; //重力更大，下落更快节奏更爽
+  }
+  draw(){ctx.font=`${this.size}px Arial`;ctx.fillText(this.emoji,this.x,this.y);}
+}
+let itemList = [];
+
+// ========== 生成更多水果 ==========
+function createItem(){
+  if(gameOver||!gameStart)return;
+  let isBomb = Math.random()<0.15;
+  itemList.push(new Item(isBomb));
+}
+
+function shakeScreen(){
+  document.body.classList.add("shake");
+  setTimeout(()=>document.body.removeAttribute("class"),250);
+}
+
+canvas.addEventListener("mousemove",e=>{
+  if(gameOver||!gameStart)return;
+  let rect=canvas.getBoundingClientRect();
+  let cx=e.clientX-rect.left;
+  let cy=e.clientY-rect.top;
+
+  itemList.forEach(item=>{
+    if(item.cut)return;
+    // 判定范围跟着超大水果放大
+    let dis=Math.hypot(cx-item.x,cy-item.y);
+    if(dis<70){
+      item.cut=true;
+      for(let i=0;i<8;i++){
+        let c=item.isBomb?"#333":"#ff6b35";
+        particles.push(new Particle(item.x,item.y,c));
+      }
+      if(item.isBomb){
+        floatTexts.push(new FloatText(cx,cy,"爆炸啦","#ff4444"));
+        shakeScreen();
+        score=Math.max(0,score-30);life--;
+        if(life<=0)endGame();
+      }else{
+        floatTexts.push(new FloatText(cx,cy,"你好棒呀","#2ecc71"));
+        score+=10;
+      }
+      updateUI();
+    }
+  });
+});
+
+function updateUI(){
+  scoreDom.innerText=score;
+  timeDom.innerText=timeLeft;
+  let h="";
+  for(let i=0;i<3;i++)h+=i<life?"❤️":"🖤";
+  lifeDom.innerText=h;
+}
+
+function startGame(){
+  startPop.style.display="none";
+  gameStart=true;
+  timer=setInterval(countDown,1000);
+}
+function countDown(){timeLeft--;updateUI();if(timeLeft<=0)endGame();}
+function endGame(){
+  gameOver=true;clearInterval(timer);
+  saveScore(score);renderRank();
+  popTextDom.innerHTML=`时间到！\n最终得分：${score}`;
+  popDom.style.display="block";
+}
+function saveScore(s){
+  let a=JSON.parse(localStorage.getItem("fruitRank"))||[];
+  a.push(s);a.sort((x,y)=>y-x);localStorage.setItem("fruitRank",JSON.stringify(a));
+}
+function renderRank(){
+  let a=JSON.parse(localStorage.getItem("fruitRank"))||[];
+  let h="";a.slice(0,6).forEach((v,i)=>h+=`<div class="rank-item">第${i+1}名：${v}分</div>`);
+  rankListDom.innerHTML=h;
+}
+function restartGame(){
+  score=0;life=3;timeLeft=45;gameOver=false;gameStart=true;
+  itemList=[];particles=[];floatTexts=[];
+  popDom.style.display="none";updateUI();
+  clearInterval(timer);timer=setInterval(countDown,1000);
+}
+
+function loop(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // 生成概率提高 → 水果更多更密集
+  if(!gameOver&&gameStart&&Math.random()<0.065)createItem();
+  for(let i=itemList.length-1;i>=0;i--){let o=itemList[i];o.update();o.draw();if(o.y>canvas.height+100||o.cut)itemList.splice(i,1);}
+  for(let i=particles.length-1;i>=0;i--){let p=particles[i];p.update();p.draw();if(p.alpha<=0)particles.splice(i,1);}
+  for(let i=floatTexts.length-1;i>=0;i--){let t=floatTexts[i];t.update();t.draw();if(t.alpha<=0)floatTexts.splice(i,1);}
+  requestAnimationFrame(loop);
+}
+
+renderRank();
+updateUI();
+loop();
+</script>
+</body>
+</html>
