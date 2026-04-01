@@ -1,0 +1,450 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>我是超级大现充！！！</title>
+    <style>
+        /* ========================
+           全局重置 & 基础风格
+           ======================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; 
+        }
+
+        body {
+            /* ---------- 背景图设置区域 ---------- */
+            /* 🌟 在这里更换你的背景图！只需替换下面的图片链接即可 🌟 */
+            background-image: url('http://www.rkunion.tech/wp-content/uploads/2026/03/1774963945-cover.jpg');  /* 默认帅气风景图，可替换任意图片URL */
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;   /* 固定背景，滚动时产生视差高级感 */
+            background-repeat: no-repeat;
+            
+            /* 优雅回退：如果背景图加载失败，使用深邃渐变色 */
+            background-color: #0a0f1e;
+            
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Inter', 'Roboto', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        /* 增加一层微妙的光晕遮罩，让背景图更融合，且突出卡片区域 (完全不影响背景图替换) */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 20%, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%);
+            pointer-events: none;  /* 让遮罩不干扰点击 */
+            z-index: 1;
+        }
+
+        /* 主容器 — 内容层 */
+        .launcher {
+            position: relative;
+            z-index: 10;
+            max-width: 1300px;
+            width: 100%;
+            backdrop-filter: blur(2px); /* 背景轻量柔焦，更融合 */
+        }
+
+        /* 标题区 — 帅气登场 */
+        .hero {
+            text-align: center;
+            margin-bottom: 3.5rem;
+        }
+        
+        .hero h1 {
+            font-size: 5.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #e62a2a, #E0E7FF, #B8F2FF);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 15px rgba(0,0,0,0.3);
+            letter-spacing: -0.02em;
+            animation: fadeSlideDown 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        
+        .hero .sub {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.85);
+            margin-top: 0.8rem;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+            display: inline-block;
+            padding: 0.3rem 1.2rem;
+            border-radius: 40px;
+            background: rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+            animation: fadeSlideUp 0.8s ease-out;
+        }
+
+        /* 三个卡片网格布局 — 帅气且现代 */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            justify-items: center;
+            align-items: stretch;
+            margin-top: 1rem;
+        }
+
+        .aurora {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;            /* 放在背景之上，卡片之下 */
+    pointer-events: none;   /* 让所有鼠标事件穿透 */
+    overflow: hidden;
+}
+
+.aurora .blob {
+    position: absolute;
+    width: 60vmax;
+    height: 60vmax;
+    background: radial-gradient(circle at 30% 40%, rgba(120, 80, 255, 0.3), rgba(255, 100, 150, 0.1));
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    animation: float 20s infinite alternate ease-in-out;
+}
+
+.aurora .blob:nth-child(1) {
+    top: -20%;
+    left: -20%;
+    background: radial-gradient(circle, rgba(100, 200, 255, 0.4), rgba(50, 50, 200, 0.1));
+    animation-duration: 25s;
+    animation-delay: -2s;
+}
+
+.aurora .blob:nth-child(2) {
+    bottom: -30%;
+    right: -20%;
+    background: radial-gradient(circle, rgba(255, 120, 180, 0.4), rgba(200, 80, 120, 0.1));
+    animation-duration: 30s;
+    animation-delay: -5s;
+}
+
+.aurora .blob:nth-child(3) {
+    top: 30%;
+    right: 20%;
+    background: radial-gradient(circle, rgba(80, 255, 180, 0.4), rgba(30, 180, 100, 0.1));
+    animation-duration: 28s;
+    animation-delay: -10s;
+    width: 80vmax;
+    height: 80vmax;
+}
+
+.aurora .blob:nth-child(4) {
+    bottom: 10%;
+    left: 30%;
+    background: radial-gradient(circle, rgba(255, 200, 80, 0.3), rgba(200, 100, 50, 0.1));
+    animation-duration: 35s;
+    animation-delay: -15s;
+}
+
+@keyframes float {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+    50% {
+        transform: translate(5%, 8%) scale(1.1) rotate(5deg);
+    }
+    100% {
+        transform: translate(-5%, -3%) scale(0.9) rotate(-5deg);
+    }
+}
+
+/* 确保卡片内容位于动画层之上 */
+.launcher {
+    position: relative;
+    z-index: 10;
+}
+
+        /* 卡片样式 — 玻璃态 + 悬停特效 */
+        .card-link {
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            transform: translateY(0);
+        }
+
+        .card {
+            background: rgba(20, 25, 45, 0.45);
+            backdrop-filter: blur(14px);
+            border-radius: 2rem;
+            padding: 2rem 1.8rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(255,255,255,0.1) inset;
+            transition: inherit;
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 悬停魔法：上升+边框发光+阴影炸裂 */
+        .card-link:hover {
+            transform: translateY(-8px);
+        }
+
+        .card-link:hover .card {
+            background: rgba(30, 35, 60, 0.6);
+            border-color: rgba(255, 255, 255, 0.55);
+            box-shadow: 0 30px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,240,0.3) inset, 0 0 18px rgba(100, 150, 255, 0.4);
+        }
+
+        /* 图标区域 帅气图标emoji + 缩放 */
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1.2rem;
+            display: inline-block;
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
+            transition: transform 0.2s ease;
+        }
+        
+        .card-link:hover .icon {
+            transform: scale(1.08);
+        }
+
+        /* 标题样式 */
+        .card h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.7rem;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* 描述文本 */
+        .card p {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.5;
+            font-weight: 500;
+            margin-top: 0.3rem;
+            background: rgba(0,0,0,0.2);
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            backdrop-filter: blur(2px);
+        }
+
+        /* 微交互装饰小箭头 */
+        .card-footer {
+            margin-top: 1.2rem;
+            font-size: 0.85rem;
+            color: rgba(255,255,200,0.9);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        
+        .card-link:hover .card-footer {
+            opacity: 1;
+        }
+        
+        .arrow {
+            font-size: 1rem;
+            transition: transform 0.2s;
+        }
+        
+        .card-link:hover .arrow {
+            transform: translateX(5px);
+        }
+
+        /* 优雅的页脚注释 */
+        .footer-note {
+            text-align: center;
+            margin-top: 3.5rem;
+            font-size: 0.8rem;
+            color: rgba(255,255,245,0.7);
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(4px);
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0.5rem 1.2rem;
+            border-radius: 60px;
+            font-weight: 400;
+        }
+        
+        .footer-note a {
+            color: #c3e2ff;
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(255,255,255,0.5);
+        }
+        
+        .footer-note a:hover {
+            color: white;
+        }
+
+        /* 动画关键帧 */
+        @keyframes fadeSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 卡片入场渐隐效果 */
+        .card-link {
+            animation: fadeSlideUp 0.6s ease-out backwards;
+        }
+        .card-link:nth-child(1) { animation-delay: 0.1s; }
+        .card-link:nth-child(2) { animation-delay: 0.2s; }
+        .card-link:nth-child(3) { animation-delay: 0.3s; }
+
+        /* 响应式细节 */
+        @media (max-width: 700px) {
+            body {
+                padding: 1.2rem;
+            }
+            .hero h1 {
+                font-size: 2.4rem;
+            }
+            .hero .sub {
+                font-size: 0.9rem;
+            }
+            .card {
+                padding: 1.5rem 1rem;
+            }
+            .card h2 {
+                font-size: 1.5rem;
+            }
+            .icon {
+                font-size: 3.2rem;
+            }
+            .card-grid {
+                gap: 1.3rem;
+            }
+        }
+
+        /* 优化触摸响应 */
+        @media (hover: hover) {
+            .card-link:hover .card {
+                transition: all 0.3s;
+            }
+        }
+        
+        /* 滚动条 精致一点 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.5);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="aurora">
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+</div>
+
+<div class="launcher">
+    <div class="hero">
+        <h1>Ciallo～(∠・ω< )⌒☆</h1>
+        <div class="sub">生存战略！◀◘◙█Ε｡.:*❉ﾟ･*:.｡.｡.:*･゜❆ﾟ･*｡.:*❉ﾟ･*:.｡.｡.★═━┈┈ ☆══━━─－－</div>
+    </div>
+
+    <!-- 三个可链接到其他网站的帅气卡片框 -->
+    <div class="card-grid">
+        
+     
+        <a href="https://khanhducdojt-arch.github.io/hk-start.html" target="_blank" rel="noopener noreferrer" class="card-link">
+            <div class="card">
+                <div class="icon">👍️</div>
+                <h2>你最棒</h2>
+                <p>前往收获鼓励</p>
+                <div class="card-footer">
+                    <span>加油！</span>
+                    <span class="arrow">➜</span>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="https://khanhducdojt-arch.github.io/" target="_blank" rel="noopener noreferrer" class="card-link">
+            <div class="card">
+                <div class="icon">🍎</div>
+                <h2>切水果</h2>
+                <p>全屏切水果·极致高燃</p>
+                <div class="card-footer">
+                    <span>即刻启程</span>
+                    <span class="arrow">➜</span>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="https://khanhducdojt-arch.github.io/nct.html" target="_blank" rel="noopener noreferrer" class="card-link">
+            <div class="card">
+                <div class="icon">🎬</div>
+                <h2>艺术鉴赏</h2>
+                <p>好欸</p>
+                <div class="card-footer">
+                    <span>一起去欣赏音乐</span>
+                    <span class="arrow">➜</span>
+                </div>
+            </div>
+        </a>
+    </div>
+    
+    <div class="footer-note">
+        点击任意卡片跳转网站 &nbsp;&nbsp;|&nbsp;&nbsp; 
+        😡👊<strong style="color:#fff">给我分打高点！</strong> : 我是超级大现充 <code style="background:rgba(0,0,0,0.5); padding:2px 6px; border-radius:20px;">晚上好捏</code> 你又是谁？
+    </div>
+</div>
+
+
+
+
+</body>
+
+
+
+</html>
